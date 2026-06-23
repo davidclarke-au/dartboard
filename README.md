@@ -1,4 +1,4 @@
-# 🎯 Dartboard — SECOPS Priority Framework
+# 🎯 Dartboard — Built from the Breach
 
 > **Real incidents. Real priorities.**
 > Built from 4 years of daily threat actor activity inside Falcon Complete.
@@ -9,7 +9,7 @@
 
 ## What is this?
 
-Dartboard is a practitioner-built SECOPS framework distilled from hundreds of real-world incidents. No vendor fluff. No theoretical frameworks. Just the 8 things that consistently separate organisations that get breached from those that don't.
+Dartboard is a practitioner-built SECOPS guide distilled from hundreds of real-world incidents. No vendor fluff. No theoretical frameworks. Just the 8 things that consistently separate organisations that get breached from those that don't.
 
 Every priority maps directly to MITRE ATT&CK techniques observed in real intrusions. Every frequency stat is sourced from industry threat reports. Built by a defender, for defenders.
 
@@ -126,7 +126,7 @@ Threat feed data lives in `FEED_TECHNIQUES` with source citations per technique:
 
 Built by **[David Clarke](https://david-clarke.id.au)** — 4 years as part of the CrowdStrike Falcon Complete team, responding to and hunting threats across hundreds of customer environments daily.
 
-This framework is the distilled answer to one question: *if you could only focus on a handful of things to protect your organisation, what would they be?*
+This guide is the distilled answer to one question: *if you could only focus on a handful of things to protect your organisation, what would they be?*
 
 ---
 
