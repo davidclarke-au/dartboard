@@ -9,6 +9,7 @@
   <meta property="og:title" content="Dartboard | SECOPS Priority Framework" />
   <meta property="og:description" content="No fluff. No theory. Just what actually matters in SECOPS." />
   <meta property="og:url" content="https://dartboard.david-clarke.id.au" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -157,8 +158,11 @@
       border-left: 2px solid var(--border);
       border-radius: 4px;
       padding: 8px 10px;
-      transition: border-left-color 0.3s;
+      transition: border-left-color 0.3s, background 0.15s;
+      cursor: pointer;
     }
+    .feed-item:hover { background: #181818; }
+    .feed-item.clickable:hover .feed-tid::after { content: ' \2192'; opacity: 0.6; }
     .feed-item.critical { border-left-color: var(--red); }
     .feed-item.high { border-left-color: var(--orange); }
     .feed-item.medium { border-left-color: #ecc94b; }
@@ -178,6 +182,8 @@
     .feed-bar { height: 2px; border-radius: 1px; background: var(--red); transition: width 1s ease; }
     .feed-bar.high { background: var(--orange); }
     .feed-bar.medium { background: #ecc94b; }
+    .feed-link-hint { display: none; font-size: 8px; color: var(--red); font-family: var(--font-mono); letter-spacing: 1px; margin-top: 4px; opacity: 0.7; }
+    .feed-item.clickable:hover .feed-link-hint { display: block; }
     .feed-updated { font-size: clamp(8px, 0.55vw, 11px); color: var(--text-dim); letter-spacing: 1px; margin-top: 10px; text-align: right; font-family: var(--font-mono); line-height: 1.6; }
     .feed-sources { display: none; flex-direction: column; gap: 3px; margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border); }
     .feed-item:hover .feed-sources { display: flex; }
@@ -323,6 +329,83 @@
     .dp-nav-btn:hover:not(:disabled) { border-color: var(--red); color: var(--red); }
     .dp-nav-btn:disabled { opacity: 0.2; cursor: default; }
 
+    /* ---- MODAL ---- */
+    .modal-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      z-index: 500;
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    .modal-backdrop.visible { opacity: 1; pointer-events: all; }
+    .modal {
+      background: var(--bg2);
+      border: 1px solid var(--red);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 760px;
+      max-height: 88vh;
+      display: flex; flex-direction: column;
+      transform: translateY(16px);
+      transition: transform 0.2s ease;
+      overflow: hidden;
+    }
+    .modal-backdrop.visible .modal { transform: translateY(0); }
+    .modal-header {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      padding: 24px 28px 16px; border-bottom: 1px solid var(--border);
+      flex-shrink: 0; gap: 16px;
+    }
+    .modal-meta { font-size: clamp(9px, 0.6vw, 12px); color: var(--red); letter-spacing: 2.5px; margin-bottom: 6px; font-family: var(--font-mono); }
+    .modal-title { font-size: clamp(18px, 1.8vw, 28px); font-weight: 700; color: var(--text); line-height: 1.2; }
+    .modal-close {
+      font-size: 20px; cursor: pointer; line-height: 1;
+      padding: 4px 10px; background: none; border: 1px solid var(--border);
+      color: var(--text-dim); border-radius: 4px; flex-shrink: 0;
+      transition: color 0.15s, border-color 0.15s; font-family: var(--font-sans);
+    }
+    .modal-close:hover { color: var(--red); border-color: var(--red-border); }
+    .modal-body {
+      padding: 24px 28px;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .modal-body::-webkit-scrollbar { width: 4px; }
+    .modal-body::-webkit-scrollbar-track { background: var(--bg); }
+    .modal-body::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 2px; }
+    .modal-text {
+      font-size: clamp(13px, 0.95vw, 17px); color: #ccc; line-height: 1.9;
+      font-family: var(--font-sans); border-left: 2px solid var(--red);
+      padding-left: 20px; margin-bottom: 24px;
+    }
+    .modal-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+    .modal-tag {
+      font-size: clamp(10px, 0.65vw, 13px); color: var(--red);
+      background: var(--red-dim); border: 1px solid var(--red-border);
+      padding: 4px 10px; border-radius: 4px;
+      font-family: var(--font-mono); letter-spacing: 0.5px;
+    }
+    .modal-footer {
+      padding: 16px 28px; border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0; gap: 12px; flex-wrap: wrap;
+    }
+    .modal-nav { display: flex; gap: 8px; }
+    .modal-nav-btn {
+      font-size: clamp(10px, 0.65vw, 13px); color: var(--text-muted);
+      background: none; border: 1px solid var(--border);
+      padding: 7px 16px; border-radius: 5px; cursor: pointer;
+      font-family: var(--font-mono); letter-spacing: 1px;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .modal-nav-btn:hover:not(:disabled) { border-color: var(--red); color: var(--red); }
+    .modal-nav-btn:disabled { opacity: 0.2; cursor: default; }
+    .modal-counter { font-size: clamp(9px, 0.6vw, 12px); color: var(--text-dim); font-family: var(--font-mono); letter-spacing: 1px; }
+
     /* ---- FOOTER ---- */
     footer {
       border-top: 1px solid var(--border);
@@ -393,7 +476,7 @@
       <div class="splash-left">
         <p class="splash-eyebrow">Based off hundreds of real world incidents</p>
         <h1 class="splash-title" id="splash-title">
-          HIT YOUR<br><span class="accent">TARGETS.</span><br>EVERY TIME.
+          REAL INCIDENTS.<br><span class="accent">REAL</span><br>PRIORITIES.
         </h1>
       </div>
 
@@ -404,7 +487,7 @@
           <div class="tt-priority" id="tt-pri"></div>
           <div class="tt-name" id="tt-name"></div>
           <div class="tt-desc" id="tt-desc"></div>
-          <div class="tt-cta">Click to open full detail &rarr;</div>
+          <div class="tt-cta">Click to open &rarr;</div>
         </div>
       </div>
 
@@ -461,11 +544,36 @@
               <button class="dp-nav-btn" id="dp-prev">&larr; Prev</button>
               <button class="dp-nav-btn" id="dp-next">Next &rarr;</button>
             </div>
+            <button class="dp-nav-btn" id="dp-readmore" style="border-color:var(--red);color:var(--red);">Read more &nearr;</button>
           </div>
         </div>
       </div>
     </section>
   </main>
+
+  <!-- MODAL -->
+  <div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-labelledby="modal-title-text">
+    <div class="modal" id="modal">
+      <div class="modal-header">
+        <div>
+          <div class="modal-meta" id="modal-meta"></div>
+          <h2 class="modal-title" id="modal-title-text"></h2>
+        </div>
+        <button class="modal-close" id="modalClose" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-text" id="modal-text"></p>
+        <div class="modal-tags" id="modal-tags"></div>
+      </div>
+      <div class="modal-footer">
+        <div class="modal-nav">
+          <button class="modal-nav-btn" id="modal-prev">&larr; Prev</button>
+          <button class="modal-nav-btn" id="modal-next">Next &rarr;</button>
+        </div>
+        <span class="modal-counter" id="modal-counter"></span>
+      </div>
+    </div>
+  </div>
 
   <footer>
     <p>Built by <a href="https://david-clarke.id.au" target="_blank" rel="noopener">David Clarke</a> &middot; 4 years inside Falcon Complete &middot; <a href="https://dartboard.david-clarke.id.au">dartboard.david-clarke.id.au</a></p>
@@ -476,25 +584,25 @@
       {
         num: "01", name: "Know your attack surface", severity: "CRITICAL",
         short: "Map every external exposure before threat actors do.",
-        detail: "You can't defend what you don't know exists. Threat actors use Active Scanning (T1595) and Gather Victim Network Information (T1590) during reconnaissance - they enumerate your surface faster than most teams audit it. This includes domains, IPs, cloud resources, and shadow IT. Build a live inventory and treat every unknown asset as a critical finding.",
+        detail: "Do the basics right first - VPNs, firewalls, exposed RDP, WordPress installs. Ensure management interfaces are not exposed to the internet and VPNs have MFA enforced. Get the hygiene right before anything else. Then build out from there - you can't defend what you don't know exists. Threat actors use Active Scanning (T1595) and Gather Victim Network Information (T1590) during reconnaissance - they enumerate your surface faster than most teams audit it. This includes domains, IPs, cloud resources, and shadow IT. Build a live inventory and treat every unknown asset as a critical finding.",
         tags: ["T1595 Active Scanning", "T1590 Network Recon", "T1592 Host Discovery", "Asset inventory", "Shadow IT"]
       },
       {
         num: "02", name: "Remote access tools (RMM)", severity: "CRITICAL",
         short: "RMM tools are a top initial access vector.",
-        detail: "Remote Monitoring and Management tools are a top vector for initial access and persistence. Adversaries abuse legitimate RMM software under technique T1219 (Remote Access Software) to blend in with normal traffic and evade detection. Audit every RMM tool - legitimate and shadow. Enforce allowlisting, restrict to known IPs, and alert on any new RMM binary execution.",
+        detail: "Audit every RMM tool in your environment - legitimate and shadow - and build an approved list. Inform your SOC, MSSP, or 3rd party of your approved RMM tools and instruct them to treat anything outside of that list as malicious - contain and escalate immediately. Also document and share your trusted relay addresses for each approved RMM tool. Anything connecting from outside those known relay addresses should be blocked and escalated without exception. Remote Monitoring and Management tools are a top vector for initial access and persistence. Adversaries abuse legitimate RMM software under technique T1219 (Remote Access Software) to blend in with normal traffic and evade detection. Enforce allowlisting, restrict to known IPs, and alert on any new RMM binary execution.",
         tags: ["T1219 Remote Access Software", "T1133 External Remote Services", "T1078 Valid Accounts", "Allowlisting", "Shadow RMM"]
       },
       {
         num: "03", name: "Password & MFA reset - harden the helpdesk", severity: "CRITICAL",
         short: "Social engineering the helpdesk bypasses all your tech controls.",
-        detail: "The helpdesk is one of the most targeted vectors for account takeover. Attackers use Phishing for Information (T1598) and MFA Request Generation (T1621) to bypass controls - often by calling the helpdesk, impersonating employees, and socially engineering a password or MFA reset. Implement strict identity verification for any account recovery: callback procedures, manager approval, out-of-band confirmation. Your entire tech stack means nothing if a social engineer can reset it.",
+        detail: "The helpdesk is one of the most targeted vectors for account takeover. Attackers use Phishing for Information (T1598) and MFA Request Generation (T1621) to bypass controls - often by calling the helpdesk, impersonating employees, and socially engineering a password or MFA reset. Implement strict identity verification for any account recovery - callback procedures, manager approval, out-of-band confirmation. Do targeted training with anyone in your organisation involved with password and identity changes or resets - they are on the front line. Critically, change your metrics for these ticket types away from how many you can close how quickly, to how well your staff followed the process, challenged suspicious requests, and escalated appropriately. Your entire tech stack means nothing if a social engineer can reset it.",
         tags: ["T1621 MFA Request Generation", "T1598 Phishing for Info", "T1078 Valid Accounts", "Social engineering", "Helpdesk policy"]
       },
       {
         num: "04", name: "Data exfil tools & services", severity: "CRITICAL",
         short: "Block the roads they use to drive data out.",
-        detail: "Threat actors rely on a predictable set of tools to stage and exfiltrate data - MEGASync, Rclone, WinSCP, and cloud sync utilities map directly to Exfiltration Over Web Service (T1567) and Exfiltration Over Alternative Protocol (T1048). Data is often staged first using Data Staged (T1074) before exfil. Block or alert on known exfil tools at proxy and endpoint. Egress filtering is just as important as ingress.",
+        detail: "Threat actors rely on a predictable set of tools to stage and exfiltrate data - MEGASync, Rclone, WinSCP, and cloud sync utilities map directly to Exfiltration Over Web Service (T1567) and Exfiltration Over Alternative Protocol (T1048). Data is often staged first using Data Staged (T1074) before exfil. Define and enforce an approved list of cloud storage tools for your organisation - block everything else and alert on any attempt to use unauthorised services. Block or alert on known exfil tools at proxy and endpoint. Egress filtering is just as important as ingress.",
         tags: ["T1567 Exfil Over Web Service", "T1048 Exfil Alt Protocol", "T1074 Data Staged", "T1560 Archive Data", "Egress filtering"]
       },
       {
@@ -506,13 +614,13 @@
       {
         num: "06", name: "3rd party incident response plan", severity: "HIGH",
         short: "When breached, who do you call and how fast?",
-        detail: "When an adversary reaches Impact (TA0040) - ransomware deployment, data destruction, or extortion - your response speed is everything. Most organisations have no IR retainer in place. Engage a 3rd party IR firm before an incident: understand their SLAs, evidence requirements, and escalation paths. Run a tabletop exercise against a realistic ransomware scenario. The worst time to read the contract is at 2am during an active breach.",
+        detail: "When an adversary reaches Impact (TA0040) - ransomware deployment, data destruction, or extortion - your response speed is everything. Most organisations have no IR retainer in place. Engage a 3rd party IR firm before an incident and ensure you have a retainer - or multiple retainers - with an appropriate SLA, ideally sub 2 hours. Understand their evidence requirements and escalation paths. Also ensure you have a plan for your key 3rd party providers in case they suffer an incident that impacts your business - think supply chain compromise. Pre-planning and tabletop exercising these scenarios will save you valuable hours when the real deal hits. The worst time to read the contract is at 2am during an active breach.",
         tags: ["TA0040 Impact", "T1486 Data Encrypted", "T1490 Inhibit Recovery", "IR retainer", "Tabletop exercise"]
       },
       {
         num: "07", name: "Fortify the developers", severity: "HIGH",
         short: "Dev environments are crown jewels with weak guards.",
-        detail: "Developer workstations are prime targets because they hold cloud credentials, source code, CI/CD pipeline access, and production secrets. Attackers exploit this via Unsecured Credentials (T1552) and Supply Chain Compromise (T1195) - a single compromised developer can lead to full environment access. Ensure EDR coverage, enforce secrets management (no hardcoded keys), and apply pipeline integrity controls. Developers are high-value targets - treat them accordingly.",
+        detail: "Developer workstations are prime targets because they hold cloud credentials, source code, CI/CD pipeline access, and production secrets. Attackers exploit this via Unsecured Credentials (T1552) and Supply Chain Compromise (T1195) - a single compromised developer can lead to full environment access. Ensure EDR coverage, enforce secrets management (no hardcoded keys), and apply pipeline integrity controls. Version pin your dependencies and implement a cooldown period before adopting new package versions - this gives the community time to identify issues before they hit your environment. Pair this with tooling that gives you visibility across your entire organisation - when a package is compromised you need to be able to answer immediately: how many people have it, how many are on the affected version, and how many credentials need to be rolled. Developers are high-value targets - treat them accordingly.",
         tags: ["T1552 Unsecured Credentials", "T1195 Supply Chain Compromise", "T1078 Valid Accounts", "T1059 Scripting", "Secrets management"]
       },
       {
@@ -521,6 +629,18 @@
         detail: "Unmanaged hosts sit outside your detection coverage and are actively sought out by threat actors as persistent footholds. They're exploited through Valid Accounts (T1078) and External Remote Services (T1133) with no EDR to trigger alerts. Attackers use Network Service Discovery (T1046) to identify them. Build a continuous discovery process, enforce an isolate-or-remediate policy, and alert on any new unmanaged device appearing on the network.",
         tags: ["T1046 Network Service Discovery", "T1133 External Remote Services", "T1078 Valid Accounts", "EDR coverage gaps", "Asset management"]
       }
+    ];
+
+    // FontAwesome 6 Solid unicode codepoints for each priority
+    const ICONS = [
+      '\uf05b', // f05b = crosshairs (01 attack surface)
+      '\uf109', // f109 = laptop (02 RMM)
+      '\uf590', // f590 = headset (03 helpdesk)
+      '\uf56e', // f56e = file-export (04 data exfil)
+      '\uf3ed', // f3ed = shield-alt (05 MFA)
+      '\uf095', // f095 = phone (06 IR plan)
+      '\uf121', // f121 = code (07 developers)
+      '\uf233', // f233 = server (08 unmanaged hosts)
     ];
 
     const SEV_COLOR = { CRITICAL: "#e53e3e", HIGH: "#ed8936" };
@@ -586,7 +706,7 @@
         g.appendChild(path);
       });
 
-      // Number in cream band
+      // Number in outer band
       const midAngle = (i + 0.5) * (360 / N);
       const [tx, ty] = toXY(midAngle, (RINGS[5] + RINGS[6]) / 2);
       const numEl = ns('text');
@@ -598,6 +718,21 @@
       numEl.setAttribute('font-family', "'Courier New', monospace");
       numEl.textContent = p.num;
       g.appendChild(numEl);
+
+      // FontAwesome icon in the inner field centre
+      const iconR = (RINGS[1] + RINGS[4]) / 2;
+      const [ix, iy] = toXY(midAngle, iconR);
+      const iconEl = ns('text');
+      iconEl.setAttribute('x', ix);
+      iconEl.setAttribute('y', iy + 7);
+      iconEl.setAttribute('text-anchor', 'middle');
+      iconEl.setAttribute('font-size', '18');
+      iconEl.setAttribute('fill', 'rgba(255,255,255,0.7)');
+      iconEl.setAttribute('font-family', "'Font Awesome 6 Free'");
+      iconEl.setAttribute('font-weight', '900');
+      iconEl.setAttribute('pointer-events', 'none');
+      iconEl.textContent = ICONS[i];
+      g.appendChild(iconEl);
 
       g.addEventListener('mouseenter', () => {
         const tt = document.getElementById('tooltip');
@@ -622,8 +757,7 @@
         });
       });
       g.addEventListener('click', () => {
-        openDetail(i);
-        document.getElementById('priorities').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        openModal(i);
       });
       svg.appendChild(g);
     }
@@ -659,8 +793,8 @@
           <div class="sev-dot"></div>
           <div class="sev-label">${p.severity}</div>
         </div>`;
-      card.addEventListener('click', () => openDetail(i));
-      card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDetail(i); } });
+      card.addEventListener('click', () => openModal(i));
+      card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openModal(i); } });
       grid.appendChild(card);
     });
 
@@ -701,6 +835,80 @@
     document.getElementById('dpClose').addEventListener('click', closeDetail);
     document.getElementById('dp-prev').addEventListener('click', () => { if (activeIdx > 0) openDetail(activeIdx - 1); });
     document.getElementById('dp-next').addEventListener('click', () => { if (activeIdx < PRIORITIES.length - 1) openDetail(activeIdx + 1); });
+    document.getElementById('dp-readmore').addEventListener('click', () => { if (activeIdx >= 0) openModal(activeIdx); });
+
+    // ---- MODAL ----
+    // ---- MODAL STATE ----
+    let modalIdx = -1;
+    let modal_mapped = PRIORITIES.map((_, idx) => idx); // default: all
+    let modal_posInMapped = 0;
+
+    function openModal(i) {
+      // Called from dartboard/cards - full set
+      const allIdxs = PRIORITIES.map((_, idx) => idx);
+      _renderModal(allIdxs, allIdxs.indexOf(i));
+    }
+
+    function openModalLimited(mapped, pos) {
+      // Called from feed - constrained set, pos is position within mapped array
+      _renderModal(mapped, pos);
+    }
+
+    function _renderModal(allowedList, posInList) {
+      modal_mapped = allowedList;
+      modal_posInMapped = posInList;
+      modalIdx = allowedList[posInList];
+
+      const p = PRIORITIES[modalIdx];
+      document.getElementById('modal-meta').textContent = 'PRIORITY ' + p.num + ' | ' + p.severity;
+      document.getElementById('modal-title-text').textContent = p.name;
+      document.getElementById('modal-text').textContent = p.detail;
+      const tagsEl = document.getElementById('modal-tags');
+      tagsEl.innerHTML = '';
+      p.tags.forEach(t => {
+        const s = document.createElement('span');
+        s.className = 'modal-tag'; s.textContent = t;
+        tagsEl.appendChild(s);
+      });
+      document.getElementById('modal-prev').disabled = posInList <= 0;
+      document.getElementById('modal-next').disabled = posInList >= allowedList.length - 1;
+      const isConstrained = allowedList.length < PRIORITIES.length;
+      document.getElementById('modal-counter').textContent =
+        (posInList + 1) + ' of ' + allowedList.length +
+        (isConstrained ? ' (related)' : '');
+      document.getElementById('modalBackdrop').classList.add('visible');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      document.getElementById('modalBackdrop').classList.remove('visible');
+      document.body.style.overflow = '';
+      modalIdx = -1;
+    }
+
+    document.getElementById('modalClose').addEventListener('click', closeModal);
+    document.getElementById('modal-prev').addEventListener('click', () => {
+      if (modal_posInMapped > 0) {
+        modal_posInMapped--;
+        _renderModal(modal_mapped, modal_posInMapped);
+      }
+    });
+    document.getElementById('modal-next').addEventListener('click', () => {
+      if (modal_posInMapped < modal_mapped.length - 1) {
+        modal_posInMapped++;
+        _renderModal(modal_mapped, modal_posInMapped);
+      }
+    });
+
+    // Close on backdrop click
+    document.getElementById('modalBackdrop').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('modalBackdrop')) closeModal();
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
 
     function updateClock() {
       const now = new Date();
@@ -718,6 +926,23 @@
     // Response Report 2026 (750+ incidents), CyberCX Threat Report 2025/2026,
     // Picus Red Report 2026 (1.08M samples), Recorded Future H1 2025.
     // Figures represent observed prevalence / incident involvement rates.
+    // Maps feed technique IDs to PRIORITIES array index (0-based)
+    // Multiple techniques can map to the same priority
+    const TECHNIQUE_PRIORITY_MAP = {
+      "T1078":       [0, 1, 2, 7], // Valid Accounts -> attack surface, RMM, helpdesk, unmanaged hosts
+      "T1566 / T1598": [2],         // Phishing -> helpdesk
+      "T1557":       [4],           // AiTM -> phishing-resistant MFA
+      "T1621":       [2, 4],        // MFA fatigue -> helpdesk + MFA
+      "T1219":       [1],           // RMM -> remote access tools
+      "T1567 / T1048": [3],         // Exfil -> data exfil tools
+      "T1595":       [0],           // Active scanning -> attack surface
+      "T1552":       [6],           // Unsecured credentials -> fortify devs
+      "T1486":       [5],           // Data encrypted -> IR plan
+      "T1195":       [6],           // Supply chain -> fortify devs
+      "T1046":       [7],           // Network discovery -> unmanaged hosts
+      "T1074":       [3],           // Data staged -> data exfil tools
+    };
+
     const FEED_TECHNIQUES = [
       {
         id: "T1078",
@@ -858,11 +1083,21 @@
       container.innerHTML = '';
       FEED_TECHNIQUES.forEach(t => {
         const sc = t.sev === 'critical' ? '' : t.sev === 'high' ? ' high' : ' medium';
+        const linkedPriorities = TECHNIQUE_PRIORITY_MAP[t.id] || [];
         const sourceList = t.sources.map(s =>
           '<div class="feed-source"><span class="feed-source-label">' + s.label + '</span> ' + s.note + '</div>'
         ).join('');
         const item = document.createElement('div');
         item.className = 'feed-item ' + (t.sev === 'critical' ? 'critical' : t.sev === 'high' ? 'high' : 'medium');
+        if (linkedPriorities.length) item.classList.add('clickable');
+
+        // If multiple priorities mapped, show which ones on hover
+        const linkHint = linkedPriorities.length > 1
+          ? '<div class="feed-link-hint">Cycles through priorities ' + linkedPriorities.map(i => PRIORITIES[i].num).join(', ') + '</div>'
+          : linkedPriorities.length === 1
+          ? '<div class="feed-link-hint">Opens priority ' + PRIORITIES[linkedPriorities[0]].num + '</div>'
+          : '';
+
         item.innerHTML =
           '<div class="feed-item-top">' +
             '<span class="feed-tid' + sc + '">' + t.id + '</span>' +
@@ -870,7 +1105,20 @@
           '</div>' +
           '<div class="feed-name">' + t.name + '</div>' +
           '<div class="feed-bar-wrap"><div class="feed-bar' + sc + '" style="width:0%" data-pct="' + t.pct + '"></div></div>' +
+          linkHint +
           '<div class="feed-sources">' + sourceList + '</div>';
+
+        // Click: cycle through mapped priorities only, not all 8
+        if (linkedPriorities.length) {
+          const mapped = linkedPriorities.slice(); // capture by value in closure
+          let cycleIdx = 0;
+          item.addEventListener('click', () => {
+            const pos = cycleIdx % mapped.length;
+            openModalLimited(mapped, pos);
+            cycleIdx++;
+          });
+        }
+
         container.appendChild(item);
       });
 
