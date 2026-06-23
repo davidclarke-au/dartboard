@@ -105,11 +105,12 @@
       padding-right: 16px;
     }
     .splash-eyebrow {
-      font-size: clamp(10px, 0.7vw, 14px); color: var(--red); letter-spacing: 4px;
-      margin-bottom: 20px; text-transform: uppercase;
+      font-size: clamp(12px, 0.85vw, 16px); color: var(--red); letter-spacing: 3px;
+      margin-bottom: 20px; text-transform: uppercase; opacity: 1;
+      font-family: var(--font-mono);
     }
     .splash-title {
-      font-size: clamp(32px, 4vw, 58px);
+      font-size: clamp(36px, 4.5vw, 64px);
       font-weight: 900;
       color: var(--text);
       line-height: 1.0;
@@ -121,7 +122,8 @@
       grid-column: 1 / -1;
       display: flex;
       justify-content: center;
-      padding-top: 28px;
+      padding-top: 16px;
+      padding-bottom: 8px;
     }
 
     /* ---- DARTBOARD ---- */
@@ -133,11 +135,11 @@
       grid-column: 2;
     }
     #dartboardSvg {
-      width: clamp(300px, 38vw, 580px);
-      height: clamp(300px, 38vw, 580px);
+      width: clamp(320px, 42vw, 620px);
+      height: clamp(320px, 42vw, 620px);
       cursor: pointer;
       display: block;
-      filter: drop-shadow(0 0 40px rgba(229,62,62,0.18));
+      filter: drop-shadow(0 0 60px rgba(229,62,62,0.32));
     }
 
     /* ---- THREAT FEED ---- */
@@ -147,7 +149,18 @@
       padding-left: 16px;
       width: 100%;
       max-width: clamp(220px, 22vw, 340px);
+      max-height: calc(100vh - 140px);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
+    .feed-items {
+      overflow-y: auto;
+      flex: 1;
+    }
+    .feed-items::-webkit-scrollbar { width: 3px; }
+    .feed-items::-webkit-scrollbar-track { background: transparent; }
+    .feed-items::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 2px; }
     .feed-header {
       display: flex; align-items: center; gap: 8px;
       margin-bottom: 12px; padding-bottom: 8px;
@@ -157,7 +170,7 @@
     .feed-live { display: flex; align-items: center; gap: 4px; margin-left: auto; }
     .feed-live-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--red); animation: pulse 2s ease-in-out infinite; }
     .feed-live-label { font-size: 8px; color: var(--red); letter-spacing: 2px; }
-    .feed-items { display: flex; flex-direction: column; gap: 6px; }
+    .feed-items { display: flex; flex-direction: column; gap: 6px; overflow-y: auto; }
     .feed-item {
       background: var(--bg2);
       border: 1px solid var(--border);
@@ -369,6 +382,8 @@
       padding: 24px 28px 16px; border-bottom: 1px solid var(--border);
       flex-shrink: 0; gap: 16px;
     }
+    .modal-icon-wrap { width: 52px; height: 52px; border-radius: 50%; border: 1px solid var(--red-border); background: var(--red-dim); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .modal-icon { font-family: 'Font Awesome 6 Free'; font-weight: 900; font-size: 22px; color: var(--red); }
     .modal-meta { font-size: clamp(9px, 0.6vw, 12px); color: var(--red); letter-spacing: 2.5px; margin-bottom: 6px; font-family: var(--font-mono); }
     .modal-title { font-size: clamp(18px, 1.8vw, 28px); font-weight: 700; color: var(--text); line-height: 1.2; }
     .modal-close {
@@ -567,9 +582,14 @@
   <div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-labelledby="modal-title-text">
     <div class="modal" id="modal">
       <div class="modal-header">
-        <div>
-          <div class="modal-meta" id="modal-meta"></div>
-          <h2 class="modal-title" id="modal-title-text"></h2>
+        <div style="display:flex;align-items:center;gap:16px;">
+          <div class="modal-icon-wrap">
+            <span class="modal-icon" id="modal-icon" aria-hidden="true"></span>
+          </div>
+          <div>
+            <div class="modal-meta" id="modal-meta"></div>
+            <h2 class="modal-title" id="modal-title-text"></h2>
+          </div>
         </div>
         <button class="modal-close" id="modalClose" aria-label="Close modal">&times;</button>
       </div>
@@ -645,14 +665,14 @@
 
     // FontAwesome 6 Solid unicode codepoints for each priority
     const ICONS = [
-      '\uf05b', // f05b = crosshairs (01 attack surface)
-      '\uf109', // f109 = laptop (02 RMM)
-      '\uf590', // f590 = headset (03 helpdesk)
-      '\uf56e', // f56e = file-export (04 data exfil)
-      '\uf3ed', // f3ed = shield-alt (05 MFA)
-      '\uf095', // f095 = phone (06 IR plan)
-      '\uf121', // f121 = code (07 developers)
-      '\uf233', // f233 = server (08 unmanaged hosts)
+      '\uf05b', // crosshairs   (01 attack surface)
+      '\uf109', // laptop       (02 RMM)
+      '\uf590', // headset      (03 helpdesk)
+      '\uf56e', // file-export  (04 data exfil)
+      '\uf132', // shield       (05 MFA)
+      '\uf095', // phone        (06 IR plan)
+      '\uf121', // code         (07 developers)
+      '\uf233', // server       (08 unmanaged hosts)
     ];
 
     const SEV_COLOR = { CRITICAL: "#e53e3e", HIGH: "#ed8936" };
@@ -738,8 +758,8 @@
       iconEl.setAttribute('x', ix);
       iconEl.setAttribute('y', iy + 7);
       iconEl.setAttribute('text-anchor', 'middle');
-      iconEl.setAttribute('font-size', '18');
-      iconEl.setAttribute('fill', 'rgba(255,255,255,0.7)');
+      iconEl.setAttribute('font-size', '22');
+      iconEl.setAttribute('fill', 'rgba(255,255,255,0.85)');
       iconEl.setAttribute('font-family', "'Font Awesome 6 Free'");
       iconEl.setAttribute('font-weight', '900');
       iconEl.setAttribute('pointer-events', 'none');
@@ -874,7 +894,11 @@
       modalIdx = allowedList[posInList];
 
       const p = PRIORITIES[modalIdx];
+      const iconChar = ICONS[modalIdx];
       document.getElementById('modal-meta').textContent = 'PRIORITY ' + p.num + ' | ' + p.severity;
+      // Update modal icon
+      const iconEl = document.getElementById('modal-icon');
+      if (iconEl) { iconEl.textContent = iconChar; }
       document.getElementById('modal-title-text').textContent = p.name;
       document.getElementById('modal-text').textContent = p.detail;
       const tagsEl = document.getElementById('modal-tags');
