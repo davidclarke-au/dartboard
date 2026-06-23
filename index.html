@@ -254,6 +254,7 @@
     }
     .section-label { font-size: 10px; color: var(--text-dim); letter-spacing: 3px; text-transform: uppercase; }
     .section-meta { font-size: clamp(10px, 0.7vw, 14px); color: var(--text-dim); letter-spacing: 1px; font-family: var(--font-sans); }
+    .section-cta { font-size: clamp(10px, 0.7vw, 13px); color: var(--red); letter-spacing: 1px; font-family: var(--font-mono); opacity: 0.8; }
     .section-meta span { color: var(--red); }
 
     .priority-grid {
@@ -280,6 +281,8 @@
     .sev-critical .sev-label { color: var(--red); }
     .sev-high .sev-dot { background: var(--orange); }
     .sev-high .sev-label { color: var(--orange); }
+    .p-card-cta { margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border); font-size: clamp(9px, 0.6vw, 11px); color: var(--red); letter-spacing: 1px; font-family: var(--font-mono); display: flex; justify-content: flex-end; opacity: 0.6; transition: opacity 0.15s; }
+    .p-card:hover .p-card-cta { opacity: 1; }
 
     /* ---- DETAIL PANEL ---- */
     .detail-section { max-width: 1600px; margin: 0 auto; padding: 0 clamp(24px, 4vw, 60px) 56px; }
@@ -523,7 +526,10 @@
       <div class="priorities-inner">
         <div class="section-header">
           <div class="section-label">Priority targets</div>
-          <div class="section-meta"><span>8</span> priorities &middot; Based on real-world threat actor TTPs</div>
+          <div style="display:flex;align-items:center;gap:20px;">
+            <div class="section-meta"><span>8</span> priorities &middot; Based on real-world threat actor TTPs</div>
+            <div class="section-cta">Click any priority for full detail &rarr;</div>
+          </div>
         </div>
         <div class="priority-grid" id="priorityGrid" role="list"></div>
       </div>
@@ -792,7 +798,8 @@
         <div class="p-sev ${sevClass}">
           <div class="sev-dot"></div>
           <div class="sev-label">${p.severity}</div>
-        </div>`;
+        </div>
+        <div class="p-card-cta">Full detail &rarr;</div>`;
       card.addEventListener('click', () => openModal(i));
       card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openModal(i); } });
       grid.appendChild(card);
