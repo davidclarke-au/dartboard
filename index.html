@@ -278,8 +278,14 @@
 
     .priority-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(clamp(180px, 14vw, 260px), 1fr));
+      grid-template-columns: repeat(4, 1fr);
       gap: 12px;
+    }
+    @media (max-width: 900px) and (min-width: 601px) {
+      .priority-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .priority-grid { grid-template-columns: repeat(2, 1fr); }
     }
     .p-card {
       background: var(--bg2);
@@ -457,7 +463,6 @@
       .splash-title { letter-spacing: -1px; font-size: clamp(32px, 8vw, 52px); }
       .tooltip { display: none; }
       #dartboardSvg { width: 280px; height: 280px; }
-      .priority-grid { grid-template-columns: repeat(2, 1fr); }
       .priorities-inner, .detail-section { padding-left: 16px; padding-right: 16px; }
       .dp-body { font-size: 13px; }
       .topbar { padding: 10px 16px; }
