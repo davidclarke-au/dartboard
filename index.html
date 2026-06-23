@@ -45,6 +45,15 @@
       min-height: 100vh;
       overflow-x: hidden;
     }
+    #bg-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 1;
+    }
+    main, header, footer { position: relative; z-index: 1; }
 
     /* ---- TOPBAR ---- */
     .topbar {
@@ -471,6 +480,8 @@
   </style>
 </head>
 <body>
+
+  <canvas id="bg-canvas" aria-hidden="true"></canvas>
 
   <!-- TOPBAR -->
   <header class="topbar">
@@ -964,6 +975,182 @@
     updateClock();
     setInterval(updateClock, 30000);
 
+    // ---- BACKGROUND ANIMATION: Radar + Network + Pulse ----
+    (function() {
+      const canvas = document.getElementById('bg-canvas');
+      const ctx = canvas.getContext('2d');
+      let W, H, cx, cy, nodes;
+      const GREEN = '26,92,42';   // dartboard green #1a5c2a
+      const RED   = '229,62,62';  // brand red
+
+      function init() {
+        W = canvas.width = window.innerWidth;
+        H = canvas.height = window.innerHeight;
+        cx = W / 2; cy = H / 2;
+        const N = 80;
+        nodes = Array.from({length: N}, () => ({
+          x: Math.random() * W,
+          y: Math.random() * H,
+          vx: (Math.random() - 0.5) * 0.25,
+          vy: (Math.random() - 0.5) * 0.25,
+          r: Math.random() * 3 + 1.5,
+          glow: 0        // 0=red, 1=fully green, fades back
+        }));
+      }
+
+      let radarAngle = 0;
+      const RADAR_RINGS = 5;
+      const SWEEP_WIDTH = 0.55; // radians of sweep trail
+
+      // Pulses
+      const pulses = [];
+      let lastPulse = 0;
+      function addPulse() { pulses.push({ r: 0, alpha: 0.35 }); }
+      addPulse();
+
+      function normaliseAngle(a) {
+        a = a % (Math.PI * 2);
+        if (a < 0) a += Math.PI * 2;
+        return a;
+      }
+
+      function angleDiff(a, b) {
+        // how far behind b is from a (clockwise)
+        let d = normaliseAngle(a) - normaliseAngle(b);
+        if (d < 0) d += Math.PI * 2;
+        return d;
+      }
+
+      function draw(ts) {
+        ctx.clearRect(0, 0, W, H);
+
+        // Radar reaches corner of screen
+        const rr = Math.sqrt(cx * cx + cy * cy) * 1.05;
+
+        // ---- RADAR RINGS ----
+        for (let i = 1; i <= RADAR_RINGS; i++) {
+          ctx.beginPath();
+          ctx.arc(cx, cy, rr * i / RADAR_RINGS, 0, Math.PI * 2);
+          ctx.strokeStyle = 'rgba(229,62,62,0.05)';
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+        // crosshairs
+        [[cx, 0, cx, H], [0, cy, W, cy]].forEach(([x1,y1,x2,y2]) => {
+          ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2);
+          ctx.strokeStyle = 'rgba(229,62,62,0.03)';
+          ctx.lineWidth = 0.5; ctx.stroke();
+        });
+
+        // ---- SWEEP FILL (arc sector) ----
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(radarAngle);
+        const sweep = ctx.createLinearGradient(0, 0, rr, 0);
+        sweep.addColorStop(0,   'rgba(229,62,62,0.0)');
+        sweep.addColorStop(0.4, 'rgba(229,62,62,0.03)');
+        sweep.addColorStop(1,   'rgba(229,62,62,0.09)');
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.arc(0, 0, rr, -SWEEP_WIDTH, 0);
+        ctx.closePath();
+        ctx.fillStyle = sweep;
+        ctx.fill();
+        ctx.restore();
+
+        // ---- SWEEP LINE ----
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + rr * Math.cos(radarAngle), cy + rr * Math.sin(radarAngle));
+        ctx.strokeStyle = 'rgba(229,62,62,0.35)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        radarAngle += 0.004;
+
+        // ---- PULSE RINGS ----
+        const MAX_PR = Math.max(W, H);
+        if (ts - lastPulse > 2400) { addPulse(); lastPulse = ts; }
+        for (let i = pulses.length - 1; i >= 0; i--) {
+          const p = pulses[i];
+          p.r += 0.7;
+          p.alpha = 0.3 * (1 - p.r / MAX_PR);
+          if (p.alpha <= 0) { pulses.splice(i, 1); continue; }
+          ctx.beginPath();
+          ctx.arc(cx, cy, p.r, 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(229,62,62,${p.alpha})`;
+          ctx.lineWidth = 0.75;
+          ctx.stroke();
+        }
+
+        // ---- NETWORK NODES ----
+        const DIST = 160;
+        for (let i = 0; i < nodes.length; i++) {
+          const n = nodes[i];
+          n.x += n.vx; n.y += n.vy;
+          if (n.x < 0 || n.x > W) n.vx *= -1;
+          if (n.y < 0 || n.y > H) n.vy *= -1;
+
+          // Check if radar sweep just hit this node
+          const nx = n.x - cx, ny = n.y - cy;
+          const nodeAngle = Math.atan2(ny, nx);
+          const diff = angleDiff(radarAngle, nodeAngle);
+          if (diff < 0.06) {
+            n.glow = 1.0; // light up green
+          }
+          // Fade glow back to red
+          if (n.glow > 0) n.glow = Math.max(0, n.glow - 0.008);
+
+          // Colour interpolation: red -> dartboard green
+          const r = Math.round(229 + (26  - 229) * n.glow);
+          const g = Math.round(62  + (92  - 62)  * n.glow);
+          const b = Math.round(62  + (42  - 62)  * n.glow);
+          const alpha = 0.35 + n.glow * 0.5;
+          const nodeColor = `rgba(${r},${g},${b},${alpha})`;
+
+          // Draw connections
+          for (let j = i + 1; j < nodes.length; j++) {
+            const m = nodes[j];
+            const dx = n.x - m.x, dy = n.y - m.y;
+            const d = Math.sqrt(dx * dx + dy * dy);
+            if (d < DIST) {
+              const lineGlow = Math.max(n.glow, m.glow);
+              const lr = Math.round(229 + (26  - 229) * lineGlow);
+              const lg = Math.round(62  + (92  - 62)  * lineGlow);
+              const lb = Math.round(62  + (42  - 62)  * lineGlow);
+              const la = (0.08 + lineGlow * 0.25) * (1 - d / DIST);
+              ctx.beginPath();
+              ctx.moveTo(n.x, n.y);
+              ctx.lineTo(m.x, m.y);
+              ctx.strokeStyle = `rgba(${lr},${lg},${lb},${la})`;
+              ctx.lineWidth = 0.5 + lineGlow * 0.5;
+              ctx.stroke();
+            }
+          }
+
+          // Draw node
+          ctx.beginPath();
+          ctx.arc(n.x, n.y, n.r + n.glow * 2, 0, Math.PI * 2);
+          ctx.fillStyle = nodeColor;
+          ctx.fill();
+
+          // Glow halo when lit
+          if (n.glow > 0.1) {
+            ctx.beginPath();
+            ctx.arc(n.x, n.y, n.r + n.glow * 8, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(26,92,42,${n.glow * 0.15})`;
+            ctx.fill();
+          }
+        }
+
+        requestAnimationFrame(draw);
+      }
+
+      init();
+      window.addEventListener('resize', init);
+      requestAnimationFrame(draw);
+    })();
+
     // ---- THREAT FEED ----
     // Data sourced from: CrowdStrike Global Threat Report 2025, Unit 42 Incident
     // Response Report 2026 (750+ incidents), CyberCX Threat Report 2025/2026,
@@ -990,10 +1177,10 @@
       {
         id: "T1078",
         name: "Valid Accounts / credential abuse",
-        pct: 79,
+        pct: 82,
         sev: "critical",
         sources: [
-          { label: "CrowdStrike GTR 2025", note: "79% of detections malware-free; credential abuse dominant vector" },
+          { label: "CrowdStrike GTR 2026", note: "82% of detections malware-free in 2025; credential abuse dominant initial access vector" },
           { label: "Unit 42 2026", note: "Identity weaknesses in 89% of investigations" },
           { label: "Recorded Future H1 2025", note: "Top technique across 194k+ events" }
         ]
@@ -1005,7 +1192,7 @@
         sev: "critical",
         sources: [
           { label: "Unit 42 2026", note: "65% of initial access via identity/social engineering" },
-          { label: "CrowdStrike GTR 2025", note: "Vishing up 442% H1 vs H2 2024; helpdesk impersonation rising" },
+          { label: "CrowdStrike GTR 2026", note: "AI-enabled adversaries up 89% YoY; vishing and social engineering primary initial access" },
           { label: "CyberCX 2026", note: "Social engineering leading initial access vector" }
         ]
       },
@@ -1017,7 +1204,7 @@
         sources: [
           { label: "CyberCX 2025", note: "AiTM kits in 75% of BEC attacks, up from 10% in 2022" },
           { label: "Unit 42 2026", note: "48% of attacks involve browser-based credential harvesting" },
-          { label: "CrowdStrike GTR 2025", note: "MFA bypass via AiTM flagged as primary identity threat" }
+          { label: "CrowdStrike GTR 2026", note: "Intrusions move through trusted identities; malware-free tradecraft at 82% of detections" }
         ]
       },
       {
@@ -1027,7 +1214,7 @@
         sev: "critical",
         sources: [
           { label: "Unit 42 2026", note: "Helpdesk manipulation (Muddled Libra-style) in 11% of all IR cases" },
-          { label: "CrowdStrike GTR 2025", note: "Callback phishing and help desk impersonation primary entry points" },
+          { label: "CrowdStrike GTR 2026", note: "Social engineering and helpdesk impersonation primary entry; breakout time now 29 mins avg" },
           { label: "Picus Red Report 2026", note: "MFA bypass techniques in 54% of identity-targeted samples" }
         ]
       },
@@ -1037,7 +1224,7 @@
         pct: 58,
         sev: "critical",
         sources: [
-          { label: "CrowdStrike GTR 2025", note: "RMM tools used in 81% of malware-free interactive intrusions" },
+          { label: "CrowdStrike GTR 2026", note: "82% of detections malware-free; adversaries use legitimate tools to blend into normal traffic" },
           { label: "Unit 42 2025", note: "RMM abuse persistent vector for Muddled Libra and RaaS groups" },
           { label: "Picus Red Report 2026", note: "T1219 in top 5 C2 techniques across 1.08M samples" }
         ]
@@ -1059,7 +1246,7 @@
         pct: 41,
         sev: "high",
         sources: [
-          { label: "CrowdStrike GTR 2025", note: "Interactive intrusions up 35% YoY; recon precedes all campaigns" },
+          { label: "CrowdStrike GTR 2026", note: "42% of vulnerabilities exploited before public disclosure; recon precedes all campaigns" },
           { label: "Unit 42 2026", note: "87% of attacks span multiple attack surfaces" },
           { label: "Recorded Future H1 2025", note: "Active scanning precursor to 41% of observed intrusions" }
         ]
@@ -1071,7 +1258,7 @@
         sev: "high",
         sources: [
           { label: "Unit 42 2026", note: "IAM misconfigurations persistent vector; dev credentials targeted" },
-          { label: "CrowdStrike GTR 2025", note: "Access broker market grew 50% YoY; credential listings dominant" },
+          { label: "CrowdStrike GTR 2026", note: "Cloud-conscious intrusions up 37%; credentials and identity primary target across cloud and SaaS" },
           { label: "Recorded Future H1 2025", note: "Credential abuse in top 3 techniques across all sectors" }
         ]
       },
@@ -1094,7 +1281,7 @@
         sources: [
           { label: "Unit 42 2026", note: "SaaS supply chain attacks up 3.8x since 2022; 23% of all attacks" },
           { label: "Unit 42 Oct 2025", note: "Developer account phishing as entry to supply chain" },
-          { label: "CrowdStrike GTR 2025", note: "Technology sector most targeted for 7th consecutive year" }
+          { label: "CrowdStrike GTR 2026", note: "AI development platforms abused; 90+ orgs had legitimate AI tools exploited by threat actors" }
         ]
       },
       {
@@ -1103,7 +1290,7 @@
         pct: 34,
         sev: "medium",
         sources: [
-          { label: "CrowdStrike GTR 2025", note: "Interactive intrusions increasingly target unmanaged/unmonitored assets" },
+          { label: "CrowdStrike GTR 2026", note: "266% increase in cloud intrusions by state-nexus actors; edge and unmanaged devices prime targets" },
           { label: "Unit 42 2026", note: "Cloud intrusions up 136% H1 2025; discovery precedes lateral movement" },
           { label: "Recorded Future H1 2025", note: "Network discovery in 34% of post-access lateral movement chains" }
         ]
@@ -1172,7 +1359,7 @@
       }, 200);
 
       document.getElementById('feedUpdated').textContent =
-        'CrowdStrike GTR 2025 | Unit 42 2026 | CyberCX 2026 | Picus 2026 | Recorded Future H1 2025';
+        'CrowdStrike GTR 2026 | Unit 42 2026 | CyberCX 2026 | Picus 2026 | Recorded Future H1 2025';
     }
 
     buildFeed();
