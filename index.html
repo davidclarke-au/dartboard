@@ -3,12 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dartboard | SECOPS Priority Framework</title>
-  <meta name="description" content="8 must-do priorities for SECOPS teams, distilled from 4 years of daily threat actor activity inside Falcon Complete." />
+  <title>Dartboard | Built from the Breach</title>
+  <meta name="description" content="8 must-do SECOPS priorities built from hundreds of real-world incidents. Real incidents. Real priorities. No fluff, no theory." />
   <meta name="author" content="David Clarke" />
-  <meta property="og:title" content="Dartboard | SECOPS Priority Framework" />
-  <meta property="og:description" content="No fluff. No theory. Just what actually matters in SECOPS." />
+  <meta property="og:title" content="Dartboard | Built from the Breach" />
+  <meta property="og:description" content="8 must-do SECOPS priorities built from hundreds of real-world incidents. Real incidents. Real priorities." />
+  <meta property="og:type" content="website" />
   <meta property="og:url" content="https://dartboard.david-clarke.id.au" />
+  <meta property="og:image" content="https://dartboard.david-clarke.id.au/og-image.svg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Dartboard | Built from the Breach" />
+  <meta name="twitter:description" content="8 must-do SECOPS priorities built from hundreds of real-world incidents." />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%23080808'/%3E%3Ccircle cx='16' cy='16' r='14' fill='none' stroke='%23e53e3e' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%23e53e3e' stroke-width='1.5'/%3E%3Ccircle cx='16' cy='16' r='4' fill='none' stroke='%23e53e3e' stroke-width='1.5'/%3E%3Ccircle cx='16' cy='16' r='2' fill='%23e53e3e'/%3E%3C/svg%3E" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -477,7 +483,7 @@
 
       <!-- LEFT: title -->
       <div class="splash-left">
-        <p class="splash-eyebrow">Based off hundreds of real world incidents</p>
+        <p class="splash-eyebrow">Based on hundreds of real world incidents</p>
         <h1 class="splash-title" id="splash-title">
           REAL INCIDENTS.<br><span class="accent">REAL</span><br>PRIORITIES.
         </h1>
@@ -582,7 +588,7 @@
   </div>
 
   <footer>
-    <p>Built by <a href="https://david-clarke.id.au" target="_blank" rel="noopener">David Clarke</a> &middot; 4 years inside Falcon Complete &middot; <a href="https://dartboard.david-clarke.id.au">dartboard.david-clarke.id.au</a></p>
+    <p>Built by <a href="https://david-clarke.id.au" target="_blank" rel="noopener">David Clarke</a> &middot; Built from the Breach &middot; <a href="https://dartboard.david-clarke.id.au">dartboard.david-clarke.id.au</a></p>
   </footer>
 
   <script>
@@ -814,7 +820,8 @@
       const p = PRIORITIES[i];
       document.getElementById('dp-meta').textContent = 'PRIORITY ' + p.num + ' | ' + p.severity;
       document.getElementById('dp-title').textContent = p.name;
-      document.getElementById('dp-body').textContent = p.detail;
+      const preview = p.detail.length > 180 ? p.detail.substring(0, 180).trimEnd() + '...' : p.detail;
+      document.getElementById('dp-body').textContent = preview;
       const tagsEl = document.getElementById('dp-tags');
       tagsEl.innerHTML = '';
       p.tags.forEach(t => {
