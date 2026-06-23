@@ -127,13 +127,7 @@
       margin-bottom: 0;
     }
     .splash-title .accent { color: var(--red); }
-    .splash-scroll-row {
-      grid-column: 1 / -1;
-      display: flex;
-      justify-content: center;
-      padding-top: 16px;
-      padding-bottom: 8px;
-    }
+
 
     /* ---- DARTBOARD ---- */
     .dartboard-outer {
@@ -518,6 +512,14 @@
         <h1 class="splash-title" id="splash-title">
           REAL INCIDENTS<br><span class="accent">REAL PRIORITIES</span>
         </h1>
+        <a class="scroll-cta" href="#priorities" aria-label="Scroll to priorities" style="margin-top:28px;justify-content:flex-end;">
+          <span class="scroll-cta-label">View all priorities</span>
+          <div class="scroll-arrow">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+              <path d="M6 2v8M2 7l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </a>
       </div>
 
       <!-- CENTRE: dartboard -->
@@ -544,17 +546,7 @@
         <div class="feed-updated" id="feedUpdated"></div>
       </div>
 
-      <!-- BOTTOM: scroll cta -->
-      <div class="splash-scroll-row">
-        <a class="scroll-cta" href="#priorities" aria-label="Scroll to priorities">
-          <span class="scroll-cta-label">View all priorities</span>
-          <div class="scroll-arrow">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-              <path d="M6 2v8M2 7l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-        </a>
-      </div>
+
 
     </section>
 
