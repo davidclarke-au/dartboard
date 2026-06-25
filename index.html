@@ -622,49 +622,49 @@
   <script>
     const PRIORITIES = [
       {
-        num: "01", name: "Know your attack surface", severity: "CRITICAL",
+        num: "01", name: "Know Your Attack Surface", severity: "CRITICAL",
         short: "Map every external exposure before threat actors do.",
         detail: "Do the basics right first - VPNs, firewalls, exposed RDP, WordPress installs. Ensure management interfaces are not exposed to the internet and VPNs have MFA enforced. Get the hygiene right before anything else. Then build out from there - you can't defend what you don't know exists. Threat actors use Active Scanning (T1595) and Gather Victim Network Information (T1590) during reconnaissance - they enumerate your surface faster than most teams audit it. This includes domains, IPs, cloud resources, and shadow IT. Build a live inventory and treat every unknown asset as a critical finding.",
         tags: ["T1595 Active Scanning", "T1590 Network Recon", "T1592 Host Discovery", "Asset inventory", "Shadow IT"]
       },
       {
-        num: "02", name: "Remote access tools (RMM)", severity: "CRITICAL",
+        num: "02", name: "Remote Access Tools (RMM)", severity: "CRITICAL",
         short: "RMM tools are a top initial access vector.",
         detail: "Audit every RMM tool in your environment - legitimate and shadow - and build an approved list. Inform your SOC, MSSP, or 3rd party of your approved RMM tools and instruct them to treat anything outside of that list as malicious - contain and escalate immediately. Also document and share your trusted relay addresses for each approved RMM tool. Anything connecting from outside those known relay addresses should be blocked and escalated without exception. Remote Monitoring and Management tools are a top vector for initial access and persistence. Adversaries abuse legitimate RMM software under technique T1219 (Remote Access Software) to blend in with normal traffic and evade detection. Enforce allowlisting, restrict to known IPs, and alert on any new RMM binary execution.",
         tags: ["T1219 Remote Access Software", "T1133 External Remote Services", "T1078 Valid Accounts", "Allowlisting", "Shadow RMM"]
       },
       {
-        num: "03", name: "Password & MFA reset - harden the helpdesk", severity: "CRITICAL",
+        num: "03", name: "Password & MFA Reset - Harden the Helpdesk", severity: "CRITICAL",
         short: "Social engineering the helpdesk bypasses all your tech controls.",
         detail: "The helpdesk is one of the most targeted vectors for account takeover. Attackers use Phishing for Information (T1598) and MFA Request Generation (T1621) to bypass controls - often by calling the helpdesk, impersonating employees, and socially engineering a password or MFA reset. Implement strict identity verification for any account recovery - callback procedures, manager approval, out-of-band confirmation. Do targeted training with anyone in your organisation involved with password and identity changes or resets - they are on the front line. Critically, change your metrics for these ticket types away from how many you can close how quickly, to how well your staff followed the process, challenged suspicious requests, and escalated appropriately. Your entire tech stack means nothing if a social engineer can reset it.",
         tags: ["T1621 MFA Request Generation", "T1598 Phishing for Info", "T1078 Valid Accounts", "Social engineering", "Helpdesk policy"]
       },
       {
-        num: "04", name: "Data exfil tools & services", severity: "CRITICAL",
+        num: "04", name: "Data Exfil Tools & Services", severity: "CRITICAL",
         short: "Block the roads they use to drive data out.",
         detail: "Threat actors rely on a predictable set of tools to stage and exfiltrate data - MEGASync, Rclone, WinSCP, and cloud sync utilities map directly to Exfiltration Over Web Service (T1567) and Exfiltration Over Alternative Protocol (T1048). Data is often staged first using Data Staged (T1074) before exfil. Define and enforce an approved list of cloud storage tools for your organisation - block everything else and alert on any attempt to use unauthorised services. Block or alert on known exfil tools at proxy and endpoint. Egress filtering is just as important as ingress.",
         tags: ["T1567 Exfil Over Web Service", "T1048 Exfil Alt Protocol", "T1074 Data Staged", "T1560 Archive Data", "Egress filtering"]
       },
       {
-        num: "05", name: "Phishing-resistant MFA", severity: "CRITICAL",
+        num: "05", name: "Phishing-Resistant MFA", severity: "CRITICAL",
         short: "SMS and TOTP MFA can be bypassed. Hardware keys can't.",
         detail: "Adversary-in-the-Middle attacks (T1557) and MFA Request Generation (T1621) make SMS and push-based MFA unreliable. Real-time phishing proxy kits capture OTPs live, making TOTP codes just as vulnerable. FIDO2/WebAuthn hardware keys are cryptographically bound to the origin domain - they cannot be phished. Move privileged accounts to hardware keys or passkeys now. Treat any MFA that can be intercepted as no MFA.",
         tags: ["T1557 Adversary-in-the-Middle", "T1621 MFA Fatigue", "T1111 MFA Interception", "T1566 Phishing", "FIDO2 / WebAuthn"]
       },
       {
-        num: "06", name: "3rd party incident response plan", severity: "HIGH",
+        num: "06", name: "3rd Party Incident Response Plan", severity: "HIGH",
         short: "When breached, who do you call and how fast?",
         detail: "When an adversary reaches Impact (TA0040) - ransomware deployment, data destruction, or extortion - your response speed is everything. Most organisations have no IR retainer in place. Engage a 3rd party IR firm before an incident and ensure you have a retainer - or multiple retainers - with an appropriate SLA, ideally sub 2 hours. Understand their evidence requirements and escalation paths. Also ensure you have a plan for your key 3rd party providers in case they suffer an incident that impacts your business - think supply chain compromise. Pre-planning and tabletop exercising these scenarios will save you valuable hours when the real deal hits. The worst time to read the contract is at 2am during an active breach.",
         tags: ["TA0040 Impact", "T1486 Data Encrypted", "T1490 Inhibit Recovery", "IR retainer", "Tabletop exercise"]
       },
       {
-        num: "07", name: "Fortify the developers", severity: "HIGH",
+        num: "07", name: "Fortify the Developers", severity: "HIGH",
         short: "Dev environments are crown jewels with weak guards.",
         detail: "Developer workstations are prime targets because they hold cloud credentials, source code, CI/CD pipeline access, and production secrets. Attackers exploit this via Unsecured Credentials (T1552) and Supply Chain Compromise (T1195) - a single compromised developer can lead to full environment access. Ensure EDR coverage, enforce secrets management (no hardcoded keys), and apply pipeline integrity controls. Version pin your dependencies and implement a cooldown period before adopting new package versions - this gives the community time to identify issues before they hit your environment. Pair this with tooling that gives you visibility across your entire organisation - when a package is compromised you need to be able to answer immediately: how many people have it, how many are on the affected version, and how many credentials need to be rolled. Developers are high-value targets - treat them accordingly.",
         tags: ["T1552 Unsecured Credentials", "T1195 Supply Chain Compromise", "T1078 Valid Accounts", "T1059 Scripting", "Secrets management"]
       },
       {
-        num: "08", name: "Reduce unmanaged hosts", severity: "HIGH",
+        num: "08", name: "Reduce Unmanaged Hosts", severity: "HIGH",
         short: "Every unmanaged host is a blind spot threat actors love.",
         detail: "Unmanaged hosts sit outside your detection coverage and are actively sought out by threat actors as persistent footholds. They're exploited through Valid Accounts (T1078) and External Remote Services (T1133) with no EDR to trigger alerts. Attackers use Network Service Discovery (T1046) to identify them. Build a continuous discovery process, enforce an isolate-or-remediate policy, and alert on any new unmanaged device appearing on the network.",
         tags: ["T1046 Network Service Discovery", "T1133 External Remote Services", "T1078 Valid Accounts", "EDR coverage gaps", "Asset management"]
