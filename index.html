@@ -1172,7 +1172,7 @@
         pct: 82,
         sev: "critical",
         sources: [
-          { label: "CrowdStrike GTR 2026", note: "82% of detections malware-free in 2025; credential abuse dominant initial access vector" },
+          { label: "CrowdStrike GTR 2026", note: "82% malware-free detections in 2025 (up from 51% in 2020); valid account abuse in 35% of cloud incidents; breakout time fell 70% from 2021 to 2025" },
           { label: "Unit 42 2026", note: "Identity weaknesses in 89% of investigations" },
           { label: "Recorded Future H1 2025", note: "Top technique across 194k+ events" }
         ]
@@ -1184,7 +1184,7 @@
         sev: "critical",
         sources: [
           { label: "Unit 42 2026", note: "65% of initial access via identity/social engineering" },
-          { label: "CrowdStrike GTR 2026", note: "AI-enabled adversaries up 89% YoY; vishing and social engineering primary initial access" },
+          { label: "CrowdStrike GTR 2026", note: "AI-enabled adversaries up 89% YoY; 563% increase in fake CAPTCHA lures; spam email volume up 141% YoY; social engineering primary initial access" },
           { label: "CyberCX 2026", note: "Social engineering leading initial access vector" }
         ]
       },
@@ -1196,7 +1196,7 @@
         sources: [
           { label: "CyberCX 2025", note: "AiTM kits in 75% of BEC attacks, up from 10% in 2022" },
           { label: "Unit 42 2026", note: "48% of attacks involve browser-based credential harvesting" },
-          { label: "CrowdStrike GTR 2026", note: "Intrusions move through trusted identities; malware-free tradecraft at 82% of detections" }
+          { label: "CrowdStrike GTR 2026", note: "Average breakout time 29 mins (65% faster than 2024); fastest ever 27 seconds; malware-free tradecraft at 82%" }
         ]
       },
       {
@@ -1216,7 +1216,7 @@
         pct: 58,
         sev: "critical",
         sources: [
-          { label: "CrowdStrike GTR 2026", note: "82% of detections malware-free; adversaries use legitimate tools to blend into normal traffic" },
+          { label: "CrowdStrike GTR 2026", note: "CHATTY SPIDER used vishing to install RMM tooling, then WinSCP for exfil - initial access to attempted exfil in 4 minutes; 82% of detections malware-free" },
           { label: "Unit 42 2025", note: "RMM abuse persistent vector for Muddled Libra and RaaS groups" },
           { label: "Picus Red Report 2026", note: "T1219 in top 5 C2 techniques across 1.08M samples" }
         ]
@@ -1227,7 +1227,7 @@
         pct: 43,
         sev: "high",
         sources: [
-          { label: "Unit 42 2026", note: "Shift from encryption to exfil/extortion as primary impact tactic" },
+          { label: "Unit 42 2026", note: "Average ransom demand declined 80.6% YoY as adversaries shift to exfil/extortion; BGH data leak sites up 35.2%; exfiltration now primary impact tactic" },
           { label: "CyberCX 2026", note: "Cyber extortion now #1 incident type, overtaking BEC" },
           { label: "Picus Red Report 2026", note: "Data theft surging; ransomware encryption dropped 38%" }
         ]
@@ -1238,7 +1238,7 @@
         pct: 41,
         sev: "high",
         sources: [
-          { label: "CrowdStrike GTR 2026", note: "42% of vulnerabilities exploited before public disclosure; recon precedes all campaigns" },
+          { label: "CrowdStrike GTR 2026", note: "Edge devices targeted in 40% of China-nexus intrusions; vulnerabilities weaponized within 2-6 days of disclosure; WARP PANDA maintained access for 22 months" },
           { label: "Unit 42 2026", note: "87% of attacks span multiple attack surfaces" },
           { label: "Recorded Future H1 2025", note: "Active scanning precursor to 41% of observed intrusions" }
         ]
@@ -1260,7 +1260,7 @@
         pct: 21,
         sev: "high",
         sources: [
-          { label: "Picus Red Report 2026", note: "T1486 in 21% of samples, down 38% from prior year" },
+          { label: "Picus Red Report 2026", note: "T1486 in 21% of samples, down 38% from prior year; average ransom demand fell 80.6% as actors shift to exfil-first extortion model" },
           { label: "CyberCX 2026", note: "Extortion overtaking encryption; dwell time up to 68 days" },
           { label: "ASD ACSC 2024-25", note: "18% of industry incidents involved data encrypted for impact" }
         ]
@@ -1271,7 +1271,7 @@
         pct: 23,
         sev: "high",
         sources: [
-          { label: "Unit 42 2026", note: "SaaS supply chain attacks up 3.8x since 2022; 23% of all attacks" },
+          { label: "Unit 42 2026", note: "PRESSURE CHOLLIMA stole 1.46 billion USD via supply chain attack (largest crypto theft ever); ShaiHulud npm malware downloaded 2 million times; 690 packages compromised Nov 2025" },
           { label: "Unit 42 Oct 2025", note: "Developer account phishing as entry to supply chain" },
           { label: "CrowdStrike GTR 2026", note: "AI development platforms abused; 90+ orgs had legitimate AI tools exploited by threat actors" }
         ]
@@ -1282,7 +1282,7 @@
         pct: 34,
         sev: "medium",
         sources: [
-          { label: "CrowdStrike GTR 2026", note: "266% increase in cloud intrusions by state-nexus actors; edge and unmanaged devices prime targets" },
+          { label: "CrowdStrike GTR 2026", note: "PUNK SPIDER (198 intrusions, +134% YoY) executed ransomware via unmanaged webcam; SCATTERED SPIDER dumped AD credentials via unmanaged VM in 3 hours; unmanaged assets are active targets" },
           { label: "Unit 42 2026", note: "Cloud intrusions up 136% H1 2025; discovery precedes lateral movement" },
           { label: "Recorded Future H1 2025", note: "Network discovery in 34% of post-access lateral movement chains" }
         ]
@@ -1351,7 +1351,7 @@
       }, 200);
 
       document.getElementById('feedUpdated').textContent =
-        'CrowdStrike GTR 2026 | Unit 42 2026 | CyberCX 2026 | Picus 2026 | Recorded Future H1 2025';
+        'CrowdStrike GTR 2026 (2025 landscape) | Unit 42 2026 | CyberCX 2026 | Picus 2026 | Recorded Future H1 2025';
     }
 
     buildFeed();
